@@ -12,7 +12,7 @@ class ImageExtractionSmokeTest {
     @Test
     void feedsImageExtraction() {
         RssSourceFetcher fetcher = new RssSourceFetcher(new ImageExtractor(),
-                new GlanceProperties(null, null, null, null, null, null, null));
+                new GlanceProperties(null, null, null, null, null, null));
         String[] feeds = {
                 "https://sspai.com/feed",
                 "https://www.ifanr.com/feed",

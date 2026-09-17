@@ -53,8 +53,8 @@ class DigestServiceTest {
         llmService = mock(LlmService.class);
         digestStore = mock(DigestStore.class);
         itemRepository = mock(DigestItemRepository.class);
-        runStatus = new RunStatus(new GlanceProperties("Asia/Shanghai", null, null, List.of(), null, null, null));
-        GlanceProperties properties = new GlanceProperties("Asia/Shanghai", null, null, List.of(HN), null, null, null);
+        runStatus = new RunStatus(new GlanceProperties("Asia/Shanghai", null, null, List.of(), null, null));
+        GlanceProperties properties = new GlanceProperties("Asia/Shanghai", null, null, List.of(HN), null, null);
         service = new DigestService(properties, List.of(fetcher), llmService, digestStore,
                 itemRepository, runStatus, new ObjectMapper());
         when(fetcher.supports(any())).thenReturn(true);
@@ -147,20 +147,6 @@ class DigestServiceTest {
         verify(llmService, never()).summarize(anyList());
         verify(digestStore, never()).saveReplacing(any(), anyBoolean());
         assertEquals("FAILED", runStatus.current().lastRunStatus());
-    }
-
-    @Test
-    void forceRegenerationIgnoresCrossDigestDedup() {
-        when(fetcher.fetch(HN)).thenReturn(List.of(
-                new FetchedItem("HackerNews", "Seen before", "https://seen.example", null, null)));
-        when(llmService.summarize(anyList())).thenReturn(Optional.empty());
-        when(digestStore.saveReplacing(any(), eq(true))).thenAnswer(inv -> inv.getArgument(0));
-
-        Optional<Digest> result = service.generate(DATE, Period.EVENING, true);
-
-        assertTrue(result.isPresent());
-        assertEquals(1, result.get().getItems().size());
-        verify(itemRepository, never()).findExistingUrls(anyCollection());
     }
 
     @Test

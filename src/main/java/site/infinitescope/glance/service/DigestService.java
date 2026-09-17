@@ -63,10 +63,6 @@ public class DigestService {
         return ZoneId.of(properties.timezone());
     }
 
-    public boolean hasDigest(LocalDate date, Period period) {
-        return digestStore.exists(date, period);
-    }
-
     @Async
     public void generateAsync(LocalDate date, Period period, boolean force) {
         try {
@@ -86,7 +82,7 @@ public class DigestService {
         }
 
         List<FetchedItem> fetched = fetchAll();
-        List<FetchedItem> fresh = dedup(fetched, force);
+        List<FetchedItem> fresh = dedup(fetched);
         if (fresh.isEmpty()) {
             log.warn("all sources failed or nothing new, skip this period ({} {})", date, period.value());
             runStatus.recordFailure("no items fetched for " + date + " " + period.value());
@@ -154,11 +150,7 @@ public class DigestService {
         return all;
     }
 
-    /**
-     * 批内按 URL 去重；force=true 时跳过跨期去重（用于补跑历史缺期，
-     * 否则历史 URL 会被全部滤掉导致补不出内容）。
-     */
-    private List<FetchedItem> dedup(List<FetchedItem> fetched, boolean ignoreHistory) {
+    private List<FetchedItem> dedup(List<FetchedItem> fetched) {
         Map<String, FetchedItem> byUrl = new LinkedHashMap<>();
         for (FetchedItem item : fetched) {
             if (item.url() == null || item.url().isBlank()) {
@@ -166,14 +158,11 @@ public class DigestService {
             }
             byUrl.putIfAbsent(item.url(), item);
         }
+        List<String> urls = List.copyOf(byUrl.keySet());
         Set<String> existing = new HashSet<>();
-        if (!ignoreHistory) {
-            List<String> urls = List.copyOf(byUrl.keySet());
-
-            for (int from = 0; from < urls.size(); from += DEDUP_BATCH_SIZE) {
-                existing.addAll(itemRepository.findExistingUrls(
-                        urls.subList(from, Math.min(from + DEDUP_BATCH_SIZE, urls.size()))));
-            }
+        for (int from = 0; from < urls.size(); from += DEDUP_BATCH_SIZE) {
+            existing.addAll(itemRepository.findExistingUrls(
+                    urls.subList(from, Math.min(from + DEDUP_BATCH_SIZE, urls.size()))));
         }
         List<FetchedItem> fresh = new ArrayList<>();
         for (FetchedItem item : byUrl.values()) {

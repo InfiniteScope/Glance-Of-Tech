@@ -33,26 +33,6 @@ public class DigestScheduler {
         run(Period.EVENING);
     }
 
-    /**
-     * 日报推送点：08:15 确保当日早报已生成（08:00 若失败则补跑）。
-     * RSS 是动态渲染（/api/digest/feed.xml），日报 = 前日晚报 + 今日早报，
-     * 此任务保证该组合此时已完整，读者轮询即可拿到。
-     */
-    @Scheduled(cron = "${glance.schedule.daily-report-cron:0 15 8 * * *}", zone = "${glance.timezone:Asia/Shanghai}")
-    public void dailyReport() {
-        LocalDate today = LocalDate.now(digestService.zoneId());
-        try {
-            if (!digestService.hasDigest(today, Period.MORNING)) {
-                log.warn("morning digest missing at daily report time, generating now");
-                digestService.generate(today, Period.MORNING, false);
-            }
-            log.info("daily report ready: {} (yesterday evening + today morning)", today);
-        } catch (Exception e) {
-            log.error("daily report task failed for {}", today, e);
-            runStatus.recordFailure(e.getMessage());
-        }
-    }
-
     private void run(Period period) {
         LocalDate today = LocalDate.now(digestService.zoneId());
         try {

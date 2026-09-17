@@ -12,8 +12,7 @@ public record GlanceProperties(
         String userAgent,
         List<Source> sources,
         Llm llm,
-        Admin admin,
-        Feed feed
+        Admin admin
 ) {
     public GlanceProperties {
         if (timezone == null || timezone.isBlank()) {
@@ -27,9 +26,6 @@ public record GlanceProperties(
         }
         if (sources == null) {
             sources = new ArrayList<>();
-        }
-        if (feed == null) {
-            feed = new Feed(null, 0, null, null);
         }
     }
 
@@ -49,25 +45,6 @@ public record GlanceProperties(
     public record Admin(String token) {
         public boolean configured() {
             return token != null && !token.isBlank();
-        }
-    }
-
-    public record Feed(
-            String link,
-            int size,
-            String publishTime,
-            String selfUrl
-    ) {
-        public Feed {
-            if (link == null || link.isBlank()) {
-                link = "http://127.0.0.1:8081/api/digest";
-            }
-            if (size <= 0) {
-                size = 20;
-            }
-            if (publishTime == null || publishTime.isBlank()) {
-                publishTime = "08:15";
-            }
         }
     }
 
