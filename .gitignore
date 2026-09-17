@@ -1,0 +1,14 @@
+target/
+data/
+logs/
+docs/PROMPT.md
+docs/TECH.md
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.env
+.idea/
+*.iml
+.vscode/
+.DS_Store

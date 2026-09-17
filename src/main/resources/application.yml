@@ -1,0 +1,76 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: glance-of-tech
+  datasource:
+    url: jdbc:sqlite:${GLANCE_DB_PATH:./data/glance.db}
+    driver-class-name: org.sqlite.JDBC
+    hikari:
+      maximum-pool-size: 2
+      connection-init-sql: PRAGMA journal_mode=WAL
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+
+logging:
+  level:
+    site.infinitescope.glance: INFO
+  file:
+    name: ${GLANCE_LOG_PATH:./logs/glance-of-tech.log}
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 14
+      total-size-cap: 200MB
+
+glance:
+  timezone: ${GLANCE_TIMEZONE:Asia/Shanghai}
+  title: ${GLANCE_TITLE:科技资讯快报}
+  user-agent: ${GLANCE_USER_AGENT:glance-of-tech/0.1 (+https://github.com/InfiniteScope/Glance-Of-Tech)}
+  schedule:
+    morning-cron: ${GLANCE_MORNING_CRON:0 0 8 * * *}
+    evening-cron: ${GLANCE_EVENING_CRON:0 0 20 * * *}
+  llm:
+    base-url: ${LLM_BASE_URL:https://api.deepseek.com/v1}
+    api-key: ${LLM_API_KEY:}
+    model: ${LLM_MODEL:deepseek-chat}
+    timeout-seconds: ${LLM_TIMEOUT_SECONDS:30}
+    max-tokens: ${LLM_MAX_TOKENS:8000}
+    temperature: ${LLM_TEMPERATURE:0.3}
+    json-mode: ${LLM_JSON_MODE:true}
+  admin:
+    token: ${GLANCE_ADMIN_TOKEN:}
+  sources:
+    - name: HackerNews
+      type: algolia
+      url: ${HN_URL:https://hn.algolia.com/api/v1/search?tags=front_page}
+      max-items: 10
+      enabled: true
+    - name: arXiv
+      type: rss
+      url: ${ARXIV_URL:http://export.arxiv.org/api/query?search_query=cat:cs.AI&sortBy=submittedDate&sortOrder=descending&max_results=10}
+      max-items: 8
+      enabled: true
+    - name: ifanr
+      type: rss
+      url: ${IFANR_URL:https://www.ifanr.com/feed}
+      max-items: 5
+      enabled: true
+    - name: IT之家
+      type: rss
+      url: ${ITHOME_URL:https://www.ithome.com/rss/}
+      max-items: 5
+      enabled: true
+    - name: 少数派
+      type: rss
+      url: ${SSPAI_URL:https://sspai.com/feed}
+      max-items: 5
+      enabled: true
+    - name: ArsTechnica
+      type: rss
+      url: ${ARS_URL:https://feeds.arstechnica.com/arstechnica/index}
+      max-items: 5
+      enabled: true
