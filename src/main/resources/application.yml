@@ -33,6 +33,12 @@ glance:
   schedule:
     morning-cron: ${GLANCE_MORNING_CRON:0 0 8 * * *}
     evening-cron: ${GLANCE_EVENING_CRON:0 0 20 * * *}
+    daily-report-cron: ${GLANCE_DAILY_REPORT_CRON:0 15 8 * * *}
+  feed:
+    link: ${GLANCE_FEED_LINK:https://infinitescope.site/digest}
+    size: ${GLANCE_FEED_SIZE:20}
+    publish-time: ${GLANCE_FEED_PUBLISH_TIME:08:15}
+    self-url: ${GLANCE_FEED_SELF_URL:}
   llm:
     base-url: ${LLM_BASE_URL:https://api.deepseek.com/v1}
     api-key: ${LLM_API_KEY:}
